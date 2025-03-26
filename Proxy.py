@@ -118,10 +118,15 @@ while True:
     # ProxyServer finds a cache hit
     # Send back response to client 
     # ~~~~ INSERT CODE ~~~~
+    for line in cacheData:
+      clientSocket.sendall(line.encode()) #iterating over each line, converting the lines into bytes and sending them to the client
     # ~~~~ END CODE INSERT ~~~~
     cacheFile.close()
     print ('Sent to the client:')
-    print ('> ' + cacheData)
+    print('> ' + ''.join(cacheData)) #combining all the lines in cacheData into a single string
+
+    clientSocket.close()
+    continue
   except:
     # cache miss.  Get resource from origin server
     originServerSocket = None
