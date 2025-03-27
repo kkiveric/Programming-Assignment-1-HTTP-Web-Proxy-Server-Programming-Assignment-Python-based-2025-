@@ -120,10 +120,14 @@ while True:
     # ~~~~ INSERT CODE ~~~~
     for line in cacheData:
       clientSocket.sendall(line.encode()) #iterating over each line, converting the lines into bytes and sending them to the client
+    
+    #Converting cacheData to a single string after sending it to the client
+    cacheData = ''.join(cacheData)
     # ~~~~ END CODE INSERT ~~~~
     cacheFile.close()
+
     print ('Sent to the client:')
-    print('> ' + ''.join(cacheData)) #combining all the lines in cacheData into a single string
+    print ('>' + cacheData)
 
     clientSocket.close()
     continue
