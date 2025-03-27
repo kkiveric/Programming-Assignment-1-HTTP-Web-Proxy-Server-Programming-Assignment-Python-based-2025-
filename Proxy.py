@@ -118,11 +118,8 @@ while True:
     # ProxyServer finds a cache hit
     # Send back response to client 
     # ~~~~ INSERT CODE ~~~~
-    for line in cacheData:
-      clientSocket.sendall(line.encode()) #iterating over each line, converting the lines into bytes and sending them to the client
-    
-    #Converting cacheData to a single string after sending it to the client
-    cacheData = ''.join(cacheData)
+    cacheData = ''.join(cacheData)  #Converting list to a single string
+    clientSocket.sendall(cacheData.encode())  #Sending the entire response at once
     # ~~~~ END CODE INSERT ~~~~
     cacheFile.close()
 
