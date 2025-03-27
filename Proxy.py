@@ -182,8 +182,6 @@ while True:
           originServerResponse += chunk #appending the chunks of data as the server continues to send data in chunks of up to 1MB
         else:
           break
-
-
       # ~~~~ END CODE INSERT ~~~~
 
       # Send the response to the client
@@ -200,7 +198,11 @@ while True:
 
       # Save origin server response in the cache file
       # ~~~~ INSERT CODE ~~~~
-      cacheFile.write(originServerResponse)
+      if (b'HTTP/1.1 302' not in originServerResponse): #handling only 302 response as 301 should be cached because its moved permenantly
+        cacheFile.write(originServerResponse)
+      else:
+        cacheFile.close()
+        os.remove(cacheLocation)
       # ~~~~ END CODE INSERT ~~~~
       cacheFile.close()
       print ('cache file closed')
