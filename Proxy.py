@@ -199,7 +199,7 @@ while True:
 
       # Save origin server response in the cache file
       # ~~~~ INSERT CODE ~~~~
-      if (b'HTTP/1.1 302' not in originServerResponse and b'max-age=0' not in originServerResponse and b'HTTP/1.1 404' not in originServerResponse): #handling only 302 response as 301 should be cached because its moved permenantly. not caching max-age=0 because it is automatically stale.
+      if (b'HTTP/1.1 302' not in originServerResponse and b'max-age=0' not in originServerResponse and b'Cache-Control: no-store' not in originServerResponse): #handling only 302 response as 301 should be cached because its moved permenantly. not caching max-age=0 because it is automatically stale. not caching responses with Cache-Control: no-store
         cacheFile.write(originServerResponse)
       else:
         cacheFile.close()
