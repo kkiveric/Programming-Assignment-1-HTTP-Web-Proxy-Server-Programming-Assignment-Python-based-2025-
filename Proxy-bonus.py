@@ -91,10 +91,12 @@ while True:
 
   # Split hostname from resource name
   resourceParts = URI.split('/', 1)
+  #splitting the host:port part based on the colon
   host_parts = resourceParts[0].split(":")
+  #if there's a colon in the host part, the first part is the name
   hostname = host_parts[0]
+  #second part is the port
   port = int(host_parts[1]) if len(host_parts) > 1 else 80
-
   resource = '/'
 
   if len(resourceParts) == 2:
@@ -122,6 +124,32 @@ while True:
     # Send back response to client 
     # ~~~~ INSERT CODE ~~~~
     cacheData = ''.join(cacheData)  #Converting list to a single string
+    #extracting the Date and max-age from cacheData
+    date_match = re.search(r"Date:\s*(.*)", cacheData)
+    max_age_match = re.search(r"max-age=(\d+)", cacheData)
+
+    #checking if both Date and max-age were found in cacheData
+    if date_match and max_age_match:
+      #extracting the cache date as a string and convert max-age to integer
+      cache_date_str = date_match.group(1)
+      max_age = int(max_age_match.group(1))
+    
+    #converting the date string to a datetime object
+    cache_time = datetime.strptime(cache_date_str, "%a, %d %b %Y %H:%M:%S %Z")
+    cache_time = cache_time.replace(tzinfo=timezone.utc)  #ensuring it's in UTC
+    
+    #getting the current UTC time
+    current_time = datetime.now(timezone.utc)
+    
+    #calculating the expiration time by adding max-age to the cache_time
+    expiration_time = cache_time + timedelta(seconds=max_age)
+    
+    #check if the current time is past the expiration time
+    if current_time > expiration_time:
+        print("Cache has expired! Sending request for new data.")
+        raise Exception("Cache expired")
+    else:
+        print("Cache is still valid. No need to fetch new data.")
     clientSocket.sendall(cacheData.encode())  #Sending the entire response at once
     # ~~~~ END CODE INSERT ~~~~
     cacheFile.close()
@@ -202,7 +230,7 @@ while True:
 
       # Save origin server response in the cache file
       # ~~~~ INSERT CODE ~~~~
-      if (b'HTTP/1.1 302' not in originServerResponse and b'max-age=0' not in originServerResponse and b'Cache-Control: no-store' not in originServerResponse): #handling only 302 response as 301 should be cached because its moved permenantly. not caching max-age=0 because it is automatically stale. not caching responses with Cache-Control: no-store
+      if (b'HTTP/1.1 302' not in originServerResponse and b'max-age=0' not in originServerResponse and b'Cache-Control: no-store' not in originServerResponse and b'HTTP/1.1 404' not in originServerResponse): #handling only 302 response as 301 should be cached because its moved permenantly. not caching max-age=0 because it is automatically stale. not caching responses with Cache-Control: no-store. not caching 404 it might be available later
         cacheFile.write(originServerResponse)
       else:
         cacheFile.close()
